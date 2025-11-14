@@ -10,6 +10,6 @@
 ```pip install -r requirements.txt```
 5. Загрузить модель signature.pt в папку models/
 6. Запустить файл main.py
-```python main.py``
+```python main.py```
 или 
 ```uvicorn main:app --reload```
