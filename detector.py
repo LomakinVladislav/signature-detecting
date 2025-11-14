@@ -50,7 +50,7 @@ class SignatureDetector:
             
             indices = non_overlapping_indices
         
-        print(f"Saved boxes: {len(keep)}")
+        print(f"Saved signature boxes: {len(keep)}")
         for i, idx in enumerate(keep):
             print(f"  Box{i+1}: [{boxes[idx][0]:.1f}, {boxes[idx][1]:.1f}, {boxes[idx][2]:.1f}, {boxes[idx][3]:.1f}] - confidence: {confidences[idx]:.3f}")
         
@@ -67,10 +67,14 @@ class SignatureDetector:
                 confidences = []
                 
                 for i, box in enumerate(r.boxes):
-                    bbox = box.xyxy[0].cpu().numpy()
-                    confidence = float(box.conf[0])
-                    boxes.append(bbox)
-                    confidences.append(confidence)
+                    class_id = int(box.cls[0])
+                    class_name = r.names[class_id]
+
+                    if class_name == "signature":
+                        bbox = box.xyxy[0].cpu().numpy()
+                        confidence = float(box.conf[0])
+                        boxes.append(bbox)
+                        confidences.append(confidence)
                 
                 keep_indices = self._non_max_suppression(boxes, confidences)
                 signature_count = len(keep_indices)
