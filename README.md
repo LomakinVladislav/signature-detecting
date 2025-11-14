@@ -8,7 +8,7 @@
 ```.\venv\Scripts\activate```
 4. Установить зависимости
 ```pip install -r requirements.txt```
-5. Загрузить модель signature.pt в папку models/
+5. Загрузить модели signature.pt и classificator.pt в папку models/
 6. Запустить файл main.py
 ```python main.py```
 или 
