@@ -29,7 +29,7 @@ class SignatureDetector:
         indices = np.argsort(confidences)[::-1]
         keep = []
         
-        print("Все обнаруженные боксы:")
+        print("All detected boxes:")
         for i, idx in enumerate(indices):
             print(f"  Box{i+1}: [{boxes[idx][0]:.1f}, {boxes[idx][1]:.1f}, {boxes[idx][2]:.1f}, {boxes[idx][3]:.1f}] - confidence: {confidences[idx]:.3f}")
         
@@ -50,7 +50,7 @@ class SignatureDetector:
             
             indices = non_overlapping_indices
         
-        print(f"Сохранилось боксов: {len(keep)}")
+        print(f"Saved boxes: {len(keep)}")
         for i, idx in enumerate(keep):
             print(f"  Box{i+1}: [{boxes[idx][0]:.1f}, {boxes[idx][1]:.1f}, {boxes[idx][2]:.1f}, {boxes[idx][3]:.1f}] - confidence: {confidences[idx]:.3f}")
         
@@ -74,6 +74,6 @@ class SignatureDetector:
                 
                 keep_indices = self._non_max_suppression(boxes, confidences)
                 signature_count = len(keep_indices)
-                print(f"ИТОГ: {signature_count} уникальных подписей")
+                print(f"TOTAL: {signature_count} unique signatures")
         
         return signature_count

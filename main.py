@@ -12,9 +12,9 @@ CLASSIFICATOR_MODEL_PATH = "models/classificator.pt"
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if not os.path.exists(SIGNATURE_MODEL_PATH):
-        raise Exception(f"Модель подписей не найдена по пути: {SIGNATURE_MODEL_PATH}")
+        raise Exception(f"The signature model was not found on the way: {SIGNATURE_MODEL_PATH}")
     if not os.path.exists(CLASSIFICATOR_MODEL_PATH):
-        raise Exception(f"Модель классификатора не найдена по пути: {CLASSIFICATOR_MODEL_PATH}")
+        raise Exception(f"The classifier model was not found on the way: {CLASSIFICATOR_MODEL_PATH}")
     
     app.state.detector = SignatureDetector(SIGNATURE_MODEL_PATH)
     app.state.classificator = DocumentClassificator(CLASSIFICATOR_MODEL_PATH)
@@ -33,7 +33,7 @@ async def detect_signatures(file: UploadFile = File(...)):
     if file_extension not in allowed_extensions:
         raise HTTPException(
             status_code=400, 
-            detail=f"Неподдерживаемый формат файла"
+            detail=f"Unsupported file format"
         )
     
     temp_filename = f"temp_uploads/{uuid.uuid4()}{file_extension}"
@@ -49,11 +49,11 @@ async def detect_signatures(file: UploadFile = File(...)):
         doc_type = classificator.classify_document(temp_filename)
         
         # Если документ рукописный - не обрабатываем
-        if doc_type == "рукописный":
+        if doc_type == "handwritten":
             return {
                 "document_type": doc_type,
                 "number_of_signatures": 0,
-                "message": "Рукописные документы не обрабатываются"
+                "message": "Handwritten documents are not processed"
             }
         
         # Если документ печатный - подсчитываем подписи
@@ -66,7 +66,7 @@ async def detect_signatures(file: UploadFile = File(...)):
         }
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка обработки: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Processing error: {str(e)}")
     
     finally:
         try:

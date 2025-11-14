@@ -14,6 +14,6 @@ class DocumentClassificator:
             if r.probs is not None:
                 # Получаем индекс класса с наибольшей вероятностью
                 class_id = r.probs.top1
-                return self.class_names.get(class_id, "неизвестный")
+                return self.class_names.get(class_id, "uknown")
         
-        return "неизвестный"
+        return "uknown"
