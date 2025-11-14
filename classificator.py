@@ -4,7 +4,7 @@ import os
 class DocumentClassificator:
     def __init__(self, model_path: str = "models/classificator.pt"):
         self.model = YOLO(model_path)
-        self.class_names = {0: "рукописный", 1: "печатный"}
+        self.class_names = {0: "handwritten", 1: "printed"}
     
     def classify_document(self, image_path: str) -> str:
         """Классифицирует документ и возвращает его тип."""
