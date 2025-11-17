@@ -4,6 +4,7 @@ import os
 import uuid
 from detector import SignatureDetector
 from classificator import DocumentClassificator
+from image_processor import ImageProcessor
 import uvicorn
 
 SIGNATURE_MODEL_PATH = "models/signature.pt"
@@ -18,6 +19,7 @@ async def lifespan(app: FastAPI):
     
     app.state.detector = SignatureDetector(SIGNATURE_MODEL_PATH)
     app.state.classificator = DocumentClassificator(CLASSIFICATOR_MODEL_PATH)
+    app.state.image_processor = ImageProcessor()
     yield
 
 app = FastAPI(
@@ -44,6 +46,13 @@ async def detect_signatures(file: UploadFile = File(...)):
             content = await file.read()
             buffer.write(content)
         
+        # Проверяем и корректируем ориентацию изображения (работает с исходным файлом)
+        image_processor = app.state.image_processor
+        was_rotated = image_processor.ensure_vertical_orientation(temp_filename)
+        
+        if was_rotated:
+            print("Image was rotated successfully")
+
         # Классифицируем документ
         classificator = app.state.classificator
         doc_type = classificator.classify_document(temp_filename)
