@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import numpy as np
 
 class SignatureDetector:
-    def __init__(self, model_path: str, iou_threshold: float = 0.7): 
+    def __init__(self, model_path: str, iou_threshold: float = 0.4): 
         # Для изменения жесткости отсеивания нужно изменять iou_threshold
         self.model = YOLO(model_path)
         self.iou_threshold = iou_threshold

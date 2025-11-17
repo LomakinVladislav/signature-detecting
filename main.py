@@ -47,8 +47,8 @@ async def detect_signatures(file: UploadFile = File(...)):
             buffer.write(content)
         
         # Проверяем и корректируем ориентацию изображения (работает с исходным файлом)
-        image_processor = app.state.image_processor
-        was_rotated = image_processor.ensure_vertical_orientation(temp_filename)
+        image_processor = app.state.image_processor 
+        was_rotated = image_processor.ensure_correct_orientation(temp_filename)
         
         if was_rotated:
             print("Image was rotated successfully")
