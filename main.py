@@ -4,7 +4,8 @@ import os
 import uuid
 from detector import SignatureDetector
 from classificator import DocumentClassificator
-from image_processor import ImageProcessor
+# from image_processor_tesseract import ImageProcessor
+from image_processor_neural import ImageProcessor
 import uvicorn
 
 SIGNATURE_MODEL_PATH = "models/signature.pt"
