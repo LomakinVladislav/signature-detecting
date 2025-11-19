@@ -1,18 +1,17 @@
 import os
-import subprocess
-import sys
-from pathlib import Path
 from PIL import Image
-import cv2
-import re
+from orientation_detector import OrientationDetector
 
 
 class ImageProcessor:
     def __init__(self):
-        self.predict_script_path = os.path.join(
-            "deep-image-orientation-detection", "predict.py"
-        )
-        self.orientation_detection_dir = "deep-image-orientation-detection"
+        # Инициализируем детектор ориентации
+        # Модель загружается один раз при создании объекта
+        try:
+            self.orientation_detector = OrientationDetector()
+        except Exception as e:
+            print(f"Warning: Could not initialize orientation detector: {str(e)}")
+            self.orientation_detector = None
 
     def ensure_correct_orientation(self, image_path: str) -> bool:
         """
@@ -20,100 +19,31 @@ class ImageProcessor:
         Возвращает True если изображение было повернуто, False если ориентация уже правильная.
         """
         try:
-            # Проверяем существование скрипта и файла
-            if not os.path.exists(self.predict_script_path):
-                print(
-                    f"Warning: Orientation detection script not found at {self.predict_script_path}"
-                )
-                return False
-
+            # Проверяем существование файла
             if not os.path.exists(image_path):
                 print(f"Warning: Image file not found at {image_path}")
                 return False
 
-            # Получаем абсолютные пути
-            abs_script_path = os.path.abspath(self.predict_script_path)
-            abs_image_path = os.path.abspath(image_path)
-            detection_dir = os.path.abspath(self.orientation_detection_dir)
+            # Если детектор не инициализирован, используем fallback
+            if self.orientation_detector is None:
+                print(
+                    "Warning: Orientation detector not available, using fallback method"
+                )
+                return self._fallback_orientation(image_path)
 
-            # print(f"Running orientation detection on: {abs_image_path}")
-            # print(f"Working directory: {detection_dir}")
+            # Получаем угол поворота напрямую от детектора
+            rotation_angle = self.orientation_detector.predict_orientation(image_path)
 
-            # Запускаем скрипт из директории deep-image-orientation-detection
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    "predict.py",  # используем относительный путь
-                    "--input_path",
-                    abs_image_path,
-                ],
-                capture_output=True,
-                text=True,
-                cwd=detection_dir,
-                timeout=30,
-            )
-
-            # # Логируем вывод для отладки
-            # if result.stdout:
-            #     print("="*60)
-            #     print(result.stdout)
-            #     print("="*60)
-
-            # Анализируем вывод для определения угла поворота
-            rotation_angle = self._parse_rotation_angle(result.stdout)
-
-            if rotation_angle is not None and rotation_angle != 0:
+            if rotation_angle != 0:
                 print(f"Rotating image by {rotation_angle}°")
                 return self._rotate_image(image_path, rotation_angle)
             else:
                 print("Image orientation is correct, no rotation needed")
                 return False
 
-        except subprocess.TimeoutExpired:
-            print("Orientation detection timed out")
-            return self._fallback_orientation(image_path)
         except Exception as e:
             print(f"Unexpected error in orientation detection: {str(e)}")
             return self._fallback_orientation(image_path)
-
-    def _parse_rotation_angle(self, output: str) -> int:
-        """
-        Парсит вывод нейронной сети для определения угла поворота.
-        Согласно документации:
-        Class 0: 0° (правильная ориентация)
-        Class 1: 90° по часовой стрелке
-        Class 2: 180°
-        Class 3: 90° против часовой стрелки
-        """
-        try:
-            # В некоторых окружениях (например, Windows-консоль с CP1251) символ градуса
-            # может отображаться как последовательность "В°". Нормализуем вывод для устойчивого парсинга.
-            normalized_output = output.replace("В°", "°") if output else ""
-
-            # Парсим по классам
-            if "Prediction: Image is correctly oriented (0°)." in normalized_output:
-                return 0
-            elif (
-                "Prediction: Image needs to be rotated 90° Clockwise to be correct."
-                in normalized_output
-            ):
-                return -90
-            elif (
-                "Prediction: Image needs to be rotated 180° to be correct."
-                in normalized_output
-            ):
-                return 180
-            elif (
-                "Prediction: Image needs to be rotated 90° Counter-Clockwise to be correct."
-                in normalized_output
-            ):
-                return 90
-
-            return 0  # По умолчанию считаем что ориентация правильная
-
-        except Exception as e:
-            print(f"Error parsing rotation angle: {str(e)}")
-            return None
 
     def _rotate_image(self, image_path: str, angle: int) -> bool:
         """
