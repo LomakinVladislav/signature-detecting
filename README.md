@@ -9,9 +9,7 @@
 4. Установить зависимости
 ```pip install -r requirements.txt```
 5. Загрузить модели signature.pt и classificator.pt в папку models/
-6. Клонировать в корень проекта репозиторий deep-image-orientation-detection
-7. Добавить модель orientation_model_v2_0.9882.pth, скачанную c https://github.com/duartebarbosadev/deep-image-orientation-detection/releases в директорию deep-image-orientation-detectionи/models/ и назвать ее best_model.pth
-8. Запустить файл main.py
+6. Запустить файл main.py
 ```python main.py```
 или 
 ```uvicorn main:app --reload```

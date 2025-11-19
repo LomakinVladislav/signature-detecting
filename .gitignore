@@ -3,3 +3,5 @@
 .venv
 venv
 models/
+images/
+!deep-image-orientation-detection/models/
